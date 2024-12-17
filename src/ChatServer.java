@@ -4,6 +4,7 @@ import java.net.*;
 import java.util.*;
 import javax.swing.*;
 
+// 챗 서버
 public class ChatServer extends JFrame {
     private JPanel contentPane;
     private JTextArea textArea;
@@ -24,6 +25,7 @@ public class ChatServer extends JFrame {
     }
 
     public ChatServer() {
+        // UI 설정
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(600, 100, 338, 386);
         contentPane = new JPanel();
@@ -44,6 +46,7 @@ public class ChatServer extends JFrame {
         contentPane.add(btnServerStart);
     }
 
+    // 서버 시작
     private void startServer() {
         try {
             serverSocket = new ServerSocket(30000);
@@ -66,6 +69,7 @@ public class ChatServer extends JFrame {
         }
     }
 
+    // 로그 메시지 추가
     private void appendText(String str) {
         SwingUtilities.invokeLater(() -> {
             textArea.append(str + "\n");
@@ -83,6 +87,7 @@ public class ChatServer extends JFrame {
             this.socket = socket;
         }
 
+        // 클라이언트 처리 로직
         public void run() {
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -98,6 +103,7 @@ public class ChatServer extends JFrame {
                     }
                 }
 
+                // 기존 채팅방 정보 전송
                 for (String chatRoom : chatRooms) {
                     out.println("CREATE_CHAT:" + chatRoom);
                     if (chatRoomPinnedMessages.containsKey(chatRoom)) {
@@ -105,17 +111,16 @@ public class ChatServer extends JFrame {
                     }
                 }
 
-                // 모든 클라이언트에게 새 사용자 알림
+                // 새 사용자 알림
                 broadcast("USER:" + name);
                 appendText(name + "님이 접속했습니다.");
 
                 String message;
                 while ((message = in.readLine()) != null) {
                     if (message.startsWith("CREATE_CHAT:")) {
-                        broadcast(message);
+                        broadcast(message); // 채팅방 생성 메시지 브로드캐스트
                     } else if (message.startsWith("CHAT:")) {
-                        // 채팅 메시지 처리 (직접 브로드캐스트하지 않음)
-                        handleChatMessage(message);
+                        handleChatMessage(message); // 채팅 메시지 처리
                     } else if (message.startsWith("UPDATE_PINNED_MESSAGE:")) {
                         updatePinnedMessage(message); // 공지 메시지 갱신 처리
                     } else {
@@ -125,6 +130,7 @@ public class ChatServer extends JFrame {
             } catch (IOException e) {
                 appendText(e.toString());
             } finally {
+                // 클라이언트 연결 종료
                 if (name != null) {
                     clients.remove(this);
                     broadcast("LEAVE:" + name);
@@ -134,6 +140,7 @@ public class ChatServer extends JFrame {
             }
         }
 
+        // 채팅 메시지 처리
         private void handleChatMessage(String message) {
             String[] parts = message.split(":", 4);
             if (parts.length == 4) {
@@ -149,17 +156,16 @@ public class ChatServer extends JFrame {
             }
         }
 
+        // 메시지 브로드캐스트, 유형에 따라 적절한 클라이언트에게 메시지 전송
         private void broadcast(String message) {
+            // 채
             if (message.startsWith("CREATE_CHAT:")) {
                 String[] parts = message.split(":", 2);
                 String participantsStr = parts[1];
 
-                // 채팅방 목록에 추가 (중복 방지)
                 if (!chatRooms.contains(participantsStr)) {
                     chatRooms.add(participantsStr);
                 }
-
-                // 모든 클라이언트에게 브로드캐스트
                 for (ClientHandler client : clients) {
                     client.out.println(message);
                 }
@@ -182,6 +188,7 @@ public class ChatServer extends JFrame {
             }
         }
 
+        // 공지 업데이트
         private void updatePinnedMessage(String message) {
             String[] parts = message.split(":", 2);
             String[] chatRoomAndMessage = parts[1].split(",", 2);
@@ -191,7 +198,7 @@ public class ChatServer extends JFrame {
             chatRoomPinnedMessages.put(chatRoomName, newMessage);
             System.out.println("공지 메시지가 갱신되었습니다: " + newMessage);
 
-            // 해당 채팅방에 있는 모든 클라이언트에게 공지 메시지 전송
+            // 해당 채팅방에 있는 모든 사용자에게 공지 전송
             for (ClientHandler client : clients) {
                 if (client.name != null) {
                     String[] participants = chatRoomName.split(", ");

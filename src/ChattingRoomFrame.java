@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+// 채팅방
 public class ChattingRoomFrame extends JFrame {
     private JPanel contentPane;
     private JTextField textField;
@@ -29,6 +30,7 @@ public class ChattingRoomFrame extends JFrame {
         this.out = out;
         this.in = in;
 
+        // UI 설정
         setTitle(chatRoomName);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBounds(100, 100, 400, 550);
@@ -38,7 +40,6 @@ public class ChattingRoomFrame extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
-        //공지 레이아웃 설정
         pinnedMessageLabel = new JLabel(pinnedMessage); // 초기 공지 설정
         pinnedMessageLabel.setOpaque(true);
         pinnedMessageLabel.setBackground(new Color(255, 250, 205)); // 밝은 노란색
@@ -48,7 +49,6 @@ public class ChattingRoomFrame extends JFrame {
         pinnedMessageLabel.setBounds(8, 50, 366, 30);
         contentPane.add(pinnedMessageLabel);
 
-        //채팅방 상단 닉네임
         JLabel lblNewLabel = new JLabel(chatRoomName);
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
         lblNewLabel.setFont(new Font("휴먼모음T", Font.BOLD, 16));
@@ -78,20 +78,14 @@ public class ChattingRoomFrame extends JFrame {
         btnEmoji.setBounds(260, 470, 40, 32);
 
         btnEmoji.addActionListener(e -> {
-            // EmoticonFrame 생성
             EmoticonFrame frame = new EmoticonFrame(this);
-
-            // 현재 ChattingRoomFrame 위치를 가져와서 EmoticonFrame의 위치 설정
             Point location = getLocation();
-            frame.setLocation(location.x + getWidth(), location.y); // 오른쪽에 띄우기 위해 x 좌표에 창 너비 추가
-
-            // 이모티콘 창을 보이도록 설정
+            frame.setLocation(location.x + getWidth(), location.y);
             frame.setVisible(true);
         });
 
         contentPane.add(btnEmoji);
 
-        //전송 버튼 설정
         JButton btnSend = new JButton("전송");
         btnSend.setBorder(new LineBorder(new Color(255, 204, 0), 3, true));
         btnSend.setBackground(new Color(255, 204, 102));
@@ -102,7 +96,6 @@ public class ChattingRoomFrame extends JFrame {
         textField.addActionListener(e -> sendMessage());
         btnSend.addActionListener(e -> sendMessage());
 
-        // 예약 버튼 설정
         JButton btnNewButton_2 = new JButton("메시지 예약");
         btnNewButton_2.setBackground(new Color(255, 204, 102));
         btnNewButton_2.setBorder(new LineBorder(new Color(255, 204, 0), 2, true));
@@ -110,22 +103,15 @@ public class ChattingRoomFrame extends JFrame {
         btnNewButton_2.setActionCommand("예약 메시지");
         btnNewButton_2.setBounds(281, 12, 93, 23);
 
-        // 버튼 클릭 시 예약 메시지 창을 오른쪽에 띄우도록 수정
         btnNewButton_2.addActionListener(e -> {
-            // ReservationMessageFrame 생성
             ReservationMessageFrame frame = new ReservationMessageFrame(socket, out, chatRoomName);
-
-            // 현재 ChattingRoomFrame 위치를 가져와서 ReservationMessageFrame의 위치 설정
             Point location = getLocation();
-            frame.setLocation(location.x + getWidth(), location.y); // 오른쪽에 띄우기 위해 x 좌표에 창 너비 추가
-
-            // 예약 메시지 창을 보이도록 설정
+            frame.setLocation(location.x + getWidth(), location.y);
             frame.setVisible(true);
         });
 
         contentPane.add(btnNewButton_2);
 
-        //채팅방 표시하는 틀
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBorder(new LineBorder(new Color(255, 255, 255)));
         scrollPane.setBounds(8, 80, 366, 380);
@@ -154,21 +140,15 @@ public class ChattingRoomFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     if (pinnedMessageLabel.getText().equals("공지 없음")) {
-                        // 공지 없음일 때 ShowPinnedMessageFrame 띄우기
                         ShowPinnedMessageFrame showFrame = new ShowPinnedMessageFrame(pinnedMessageLabel, chatRoomName);
-
-                        // 현재 ChattingRoomFrame 위치를 가져와서 오른쪽에 띄우기
                         Point location = getLocation();
-                        showFrame.setLocation(location.x + getWidth(), location.y); // 오른쪽에 띄우기 위해 x 좌표에 창 너비 추가
+                        showFrame.setLocation(location.x + getWidth(), location.y);
 
                         showFrame.setVisible(true);
                     } else {
-                        // 공지 있을 때 PinnedMessageEditorFrame 띄우기
                         PinnedMessageEditorFrame editorFrame = new PinnedMessageEditorFrame(pinnedMessageLabel.getText(), pinnedMessageLabel, chatRoomName);
-
-                        // 현재 ChattingRoomFrame 위치를 가져와서 오른쪽에 띄우기
                         Point location = getLocation();
-                        editorFrame.setLocation(location.x + getWidth(), location.y); // 오른쪽에 띄우기 위해 x 좌표에 창 너비 추가
+                        editorFrame.setLocation(location.x + getWidth(), location.y);
 
                         editorFrame.setVisible(true);
                     }
@@ -178,19 +158,19 @@ public class ChattingRoomFrame extends JFrame {
 
     }
 
+    // 프레임 위치 설정
     public void setParentLocation(Point parentLocation) {
         if (parentLocation != null) {
             setLocation(parentLocation);
         }
     }
 
+    // 서버 연결
     private void connectToServer() {
         try {
             socket = new Socket("localhost", 30000);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-
-            // 사용자 이름 전송
             out.println(FriendListFrame.getUserName());
 
             // 메시지 수신 스레드 시작
@@ -200,6 +180,7 @@ public class ChattingRoomFrame extends JFrame {
         }
     }
 
+    // 서버로부터 메시지 수신
     private void receiveMessages() {
         try {
             String message;
@@ -235,6 +216,7 @@ public class ChattingRoomFrame extends JFrame {
         }
     }
 
+    // 메시지 전송
     private void sendMessage() {
         String message = textField.getText().trim();
         if (!message.isEmpty()) {
@@ -243,6 +225,7 @@ public class ChattingRoomFrame extends JFrame {
         }
     }
 
+    // 메시지 표시
     private void displayMessage(String sender, String message, boolean isOwnMessage) {
         StyledDocument doc = chatArea.getStyledDocument();
         SimpleAttributeSet keyWord = new SimpleAttributeSet();
@@ -300,6 +283,7 @@ public class ChattingRoomFrame extends JFrame {
         scrollToBottom();
     }
 
+    // 서버 연결 끊기
     private void closeChatConnection() {
         try {
             if (out != null) {
@@ -314,6 +298,7 @@ public class ChattingRoomFrame extends JFrame {
         }
     }
 
+    // 커서 위치 맨 밑으로
     private void scrollToBottom() {
         SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = ((JScrollPane) chatArea.getParent().getParent()).getVerticalScrollBar();
@@ -326,5 +311,4 @@ public class ChattingRoomFrame extends JFrame {
         out.println("UPDATE_PINNED_MESSAGE:" + newMessage+"," + chatRoomName);
         out.flush();
     }
-
 }

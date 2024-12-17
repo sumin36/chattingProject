@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 import java.util.Arrays;
 import java.util.List;
 
+// 채팅리스트
 public class ChattingList extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -40,6 +41,7 @@ public class ChattingList extends JFrame {
     private PrintWriter out;
 
     public ChattingList() {
+        // UI 설정
         setTitle("Chating List");
         setFont(new Font("HY헤드라인M", Font.PLAIN, 12));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,11 +85,10 @@ public class ChattingList extends JFrame {
         table.getColumn("Profile").setMaxWidth(80);
         table.setFont(new Font("휴먼모음T", Font.BOLD, 12));
         table.getTableHeader().setReorderingAllowed(false);
-
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) { // 더블 클릭 시
+                if (e.getClickCount() == 2) { // 채팅방 더블 클릭 시 해당 채팅방으로 이동
                     int row = table.rowAtPoint(e.getPoint());
                     if (row >= 0) {
                         String chatRoomName = (String) tableModel.getValueAt(row, 1);
@@ -124,7 +125,7 @@ public class ChattingList extends JFrame {
         NewLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                TransChatingPage();
+                transChattingPage();
             }
         });
 
@@ -138,6 +139,7 @@ public class ChattingList extends JFrame {
         connectToServer();
     }
 
+    // 서버 연결
     private void connectToServer() {
         try {
             socket = new Socket("localhost", 30000);
@@ -153,6 +155,7 @@ public class ChattingList extends JFrame {
         }
     }
 
+    // 서버로부터 메시지 수신
     private void receiveMessages() {
         try {
             String message;
@@ -173,13 +176,7 @@ public class ChattingList extends JFrame {
         }
     }
 
-    private void openChatRoom(String chatRoomName) {
-        List<String> participants = Arrays.asList(chatRoomName.split(", "));
-        ChattingRoomFrame chatRoom = new ChattingRoomFrame(chatRoomName, participants, socket, out, in);
-        chatRoom.setParentLocation(getLocation()); // ChattingList 창의 위치를 전달
-        chatRoom.setVisible(true);
-    }
-
+    // 새 채팅방 추가
     public void addNewChatRoom(List<String> participants) {
         String chatRoomName = String.join(", ", participants);
         SwingUtilities.invokeLater(() -> {
@@ -189,24 +186,30 @@ public class ChattingList extends JFrame {
                 }
             }
             tableModel.addRow(new Object[]{null, chatRoomName});
-            table.repaint(); // UI를 강제로 새로고침
+            table.repaint();
         });
     }
 
+    // 새 채팅방 생성
+    public void createNewChatRoom(List<String> participants) {
+        String participantsStr = String.join(",", participants);
+        out.println("CREATE_CHAT:" + participantsStr);
+        SwingUtilities.invokeLater(() -> addNewChatRoom(participants));
+    }
 
-    private void TransChatingPage() {
+    // 친구 목록 페이지로 전환
+    private void transChattingPage() {
         FriendListFrame friendList = new FriendListFrame();
-        friendList.setLocation(getLocation());  // 현재 위치 전달
+        friendList.setLocation(getLocation());
         friendList.setVisible(true);
         setVisible(false);
     }
 
-    public void createNewChatRoom(List<String> participants) {
-        String participantsStr = String.join(",", participants);
-        out.println("CREATE_CHAT:" + participantsStr);
-        // 서버 응답을 기다리지 않고 즉시 로컬에 채팅방 추가
-        SwingUtilities.invokeLater(() -> addNewChatRoom(participants));
+    // 채팅방 열기
+    private void openChatRoom(String chatRoomName) {
+        List<String> participants = Arrays.asList(chatRoomName.split(", "));
+        ChattingRoomFrame chatRoom = new ChattingRoomFrame(chatRoomName, participants, socket, out, in);
+        chatRoom.setParentLocation(getLocation());
+        chatRoom.setVisible(true);
     }
-
-
 }

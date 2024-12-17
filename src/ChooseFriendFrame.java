@@ -6,6 +6,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.border.LineBorder;
 
+// 친구 선택 프레임
 public class ChooseFriendFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -23,6 +24,7 @@ public class ChooseFriendFrame extends JFrame {
     }
 
     private void initComponents() {
+        // UI 설정
         setTitle("친구 선택");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(500, 100, 300, 400);
@@ -50,6 +52,7 @@ public class ChooseFriendFrame extends JFrame {
         contentPane.add(selectButton, BorderLayout.SOUTH);
     }
 
+    // 친구리스트 업데이트
     public void updateFriendList() {
         SwingUtilities.invokeLater(() -> {
             friendListPanel.removeAll();
@@ -70,6 +73,7 @@ public class ChooseFriendFrame extends JFrame {
         });
     }
 
+    // 채팅방 생성
     private void createChatRoom() {
         List<String> selectedFriends = getSelectedFriends();
         String userName = FriendListFrame.getUserName();
@@ -83,7 +87,7 @@ public class ChooseFriendFrame extends JFrame {
         }
     }
 
-
+    // 선택한 친구 불러오기
     private List<String> getSelectedFriends() {
         List<String> selectedFriends = new ArrayList<>();
         for (JCheckBox checkBox : friendCheckBoxes) {

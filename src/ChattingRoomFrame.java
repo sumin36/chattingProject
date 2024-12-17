@@ -23,7 +23,7 @@ public class ChattingRoomFrame extends JFrame {
     private String chatRoomName;
     private Socket socket;
     private JLabel pinnedMessageLabel;
-    private String pinnedMessage = "공지 없음"; // 기본 공지 메시지
+    private String pinnedMessage = "공지 없음";
 
     public ChattingRoomFrame(String chatRoomName, List<String> participants, Socket socket, PrintWriter out, BufferedReader in) {
         this.chatRoomName = chatRoomName;
@@ -40,9 +40,9 @@ public class ChattingRoomFrame extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
-        pinnedMessageLabel = new JLabel(pinnedMessage); // 초기 공지 설정
+        pinnedMessageLabel = new JLabel(pinnedMessage);
         pinnedMessageLabel.setOpaque(true);
-        pinnedMessageLabel.setBackground(new Color(255, 250, 205)); // 밝은 노란색
+        pinnedMessageLabel.setBackground(new Color(255, 250, 205)); 
         pinnedMessageLabel.setFont(new Font("휴먼모음T", Font.BOLD, 13));
         pinnedMessageLabel.setBorder(new LineBorder(new Color(255, 204, 102), 2));
         pinnedMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -134,11 +134,11 @@ public class ChattingRoomFrame extends JFrame {
                 closeChatConnection();
             }
         });
-
+        
         pinnedMessageLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 2) { // 더블 클릭 시 공지 설정 프레임으로 이동
                     if (pinnedMessageLabel.getText().equals("공지 없음")) {
                         ShowPinnedMessageFrame showFrame = new ShowPinnedMessageFrame(pinnedMessageLabel, chatRoomName);
                         Point location = getLocation();

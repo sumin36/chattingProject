@@ -212,7 +212,8 @@ public class FriendListFrame extends JFrame {
 
     private void TransChatingPage() {
         ChattingList chatPage = new ChattingList();
+        chatPage.setLocation(getLocation());  // 현재 창의 위치를 ChattingList 창에 전달
         chatPage.setVisible(true);
-        setVisible(false);
+        setVisible(false);  // 현재 창 닫기
     }
 }

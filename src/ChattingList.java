@@ -48,13 +48,13 @@ public class ChattingList extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        JMenu mnNewMenu = new JMenu("채팅방 만들기");
-        mnNewMenu.setFont(new Font("휴먼모음T", Font.PLAIN, 13));
+        JMenu mnNewMenu = new JMenu("+");
+        mnNewMenu.setFont(new Font("휴먼모음T", Font.BOLD, 18));
         mnNewMenu.setBackground(new Color(255, 255, 255));
         mnNewMenu.setForeground(new Color(0, 0, 0));
         menuBar.add(mnNewMenu);
 
-        JMenuItem mntmNewMenuItem = new JMenuItem("일반 채팅");
+        JMenuItem mntmNewMenuItem = new JMenuItem("채팅방 생성");
         mntmNewMenuItem.setFont(new Font("휴먼모음T", Font.PLAIN, 13));
         mntmNewMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -64,15 +64,6 @@ public class ChattingList extends JFrame {
             }
         });
         mnNewMenu.add(mntmNewMenuItem);
-
-        JMenuItem mntmNewMenuItem_1 = new JMenuItem("비밀 채팅");
-        mntmNewMenuItem_1.setFont(new Font("휴먼모음T", Font.PLAIN, 13));
-        mntmNewMenuItem_1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openFriendList();
-            }
-        });
-        mnNewMenu.add(mntmNewMenuItem_1);
 
         contentPane = new JPanel();
         contentPane.setBackground(new Color(255, 204, 102));
@@ -107,6 +98,7 @@ public class ChattingList extends JFrame {
         });
 
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setFont(new Font("휴먼모음T", Font.PLAIN, 12));
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
         JLabel NewLabel = new JLabel("");
@@ -167,8 +159,10 @@ public class ChattingList extends JFrame {
             while ((message = in.readLine()) != null) {
                 if (message.startsWith("CREATE_CHAT:")) {
                     String[] parts = message.split(":", 2);
-                    String participants = parts[1];
+                    final String participants = parts[1];
                     List<String> participantList = Arrays.asList(participants.split(","));
+
+                    // 클라이언트 이름이 포함된 경우에만 채팅방 생성
                     if (participantList.contains(FriendListFrame.getUserName())) {
                         SwingUtilities.invokeLater(() -> addNewChatRoom(participantList));
                     }
@@ -182,38 +176,37 @@ public class ChattingList extends JFrame {
     private void openChatRoom(String chatRoomName) {
         List<String> participants = Arrays.asList(chatRoomName.split(", "));
         ChattingRoomFrame chatRoom = new ChattingRoomFrame(chatRoomName, participants, socket, out, in);
+        chatRoom.setParentLocation(getLocation()); // ChattingList 창의 위치를 전달
         chatRoom.setVisible(true);
     }
 
-
     public void addNewChatRoom(List<String> participants) {
         String chatRoomName = String.join(", ", participants);
-
-        // 중복 확인
-        for (int i = 0; i < tableModel.getRowCount(); i++) {
-            if (chatRoomName.equals(tableModel.getValueAt(i, 1))) {
-                return;
+        SwingUtilities.invokeLater(() -> {
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                if (chatRoomName.equals(tableModel.getValueAt(i, 1))) {
+                    return; // 이미 채팅방이 존재하면 중복 추가 방지
+                }
             }
-        }
-
-        tableModel.insertRow(0, new Object[]{null, chatRoomName});
+            tableModel.addRow(new Object[]{null, chatRoomName});
+            table.repaint(); // UI를 강제로 새로고침
+        });
     }
+
 
     private void TransChatingPage() {
         FriendListFrame friendList = new FriendListFrame();
+        friendList.setLocation(getLocation());  // 현재 위치 전달
         friendList.setVisible(true);
         setVisible(false);
-    }
-
-    private void openFriendList() {
-        FriendListFrame friendList = new FriendListFrame();
-        friendList.setVisible(true);
-        this.setVisible(false);
     }
 
     public void createNewChatRoom(List<String> participants) {
         String participantsStr = String.join(",", participants);
         out.println("CREATE_CHAT:" + participantsStr);
-        addNewChatRoom(participants);
+        // 서버 응답을 기다리지 않고 즉시 로컬에 채팅방 추가
+        SwingUtilities.invokeLater(() -> addNewChatRoom(participants));
     }
+
+
 }

@@ -1,11 +1,7 @@
 import java.awt.EventQueue;
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import javax.swing.*;
 
 public class ChatServer extends JFrame {
@@ -14,6 +10,7 @@ public class ChatServer extends JFrame {
     private ServerSocket serverSocket;
     private Set<ClientHandler> clients = new HashSet<>();
     private List<String> chatRooms = new ArrayList<>();
+    private Map<String, String> chatRoomPinnedMessages = new HashMap<>(); // 각 채팅방의 공지 메시지 관리
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -103,6 +100,9 @@ public class ChatServer extends JFrame {
 
                 for (String chatRoom : chatRooms) {
                     out.println("CREATE_CHAT:" + chatRoom);
+                    if (chatRoomPinnedMessages.containsKey(chatRoom)) {
+                        out.println("PINNED_MESSAGE:" + chatRoomPinnedMessages.get(chatRoom));
+                    }
                 }
 
                 // 모든 클라이언트에게 새 사용자 알림
@@ -114,8 +114,10 @@ public class ChatServer extends JFrame {
                     if (message.startsWith("CREATE_CHAT:")) {
                         broadcast(message);
                     } else if (message.startsWith("CHAT:")) {
-                        // 채팅 메시지 처리
-                        broadcast(message);
+                        // 채팅 메시지 처리 (직접 브로드캐스트하지 않음)
+                        handleChatMessage(message);
+                    } else if (message.startsWith("UPDATE_PINNED_MESSAGE:")) {
+                        updatePinnedMessage(message); // 공지 메시지 갱신 처리
                     } else {
                         broadcast(name + ": " + message);
                     }
@@ -132,29 +134,10 @@ public class ChatServer extends JFrame {
             }
         }
 
-
-        private void broadcast(String message) {
-            if (message.startsWith("CREATE_CHAT:")) {
-                String[] parts = message.split(":", 2);
-                String participantsStr = parts[1];
-                String[] participants = participantsStr.split(",");
-                Set<String> participantSet = new HashSet<>(Arrays.asList(participants));
-
-                // 중복 확인
-                if (!chatRooms.contains(participantsStr)) {
-                    chatRooms.add(participantsStr);
-                    for (ClientHandler client : clients) {
-                        if (participantSet.contains(client.name)) {
-                            client.out.println("CREATE_CHAT:" + participantsStr);
-                        }
-                    }
-                }
-            } else if (message.startsWith("CHAT:")) {
-                String[] parts = message.split(":", 4);
+        private void handleChatMessage(String message) {
+            String[] parts = message.split(":", 4);
+            if (parts.length == 4) {
                 String chatRoomName = parts[1];
-                String sender = parts[2];
-                String chatMessage = parts[3];
-                System.out.println("Chat message received: Room: " + chatRoomName + ", Sender: " + sender + ", Message: " + chatMessage); // 로그 추가
                 String[] participants = chatRoomName.split(", ");
                 Set<String> participantSet = new HashSet<>(Arrays.asList(participants));
 
@@ -164,9 +147,57 @@ public class ChatServer extends JFrame {
                     }
                 }
             }
-            else {
+        }
+
+        private void broadcast(String message) {
+            if (message.startsWith("CREATE_CHAT:")) {
+                String[] parts = message.split(":", 2);
+                String participantsStr = parts[1];
+
+                // 채팅방 목록에 추가 (중복 방지)
+                if (!chatRooms.contains(participantsStr)) {
+                    chatRooms.add(participantsStr);
+                }
+
+                // 모든 클라이언트에게 브로드캐스트
                 for (ClientHandler client : clients) {
                     client.out.println(message);
+                }
+            }
+            else if (message.startsWith("CHAT:")) {
+                String[] parts = message.split(":", 4);
+                String chatRoomName = parts[1];
+                String[] participants = chatRoomName.split(", ");
+                Set<String> participantSet = new HashSet<>(Arrays.asList(participants));
+
+                for (ClientHandler client : clients) {
+                    if (participantSet.contains(client.name)) {
+                        client.out.println(message);
+                    }
+                }
+            } else {
+                for (ClientHandler client : clients) {
+                    client.out.println(message);
+                }
+            }
+        }
+
+        private void updatePinnedMessage(String message) {
+            String[] parts = message.split(":", 2);
+            String[] chatRoomAndMessage = parts[1].split(",", 2);
+            String chatRoomName = chatRoomAndMessage[1].trim();
+            String newMessage = chatRoomAndMessage[0].trim();
+
+            chatRoomPinnedMessages.put(chatRoomName, newMessage);
+            System.out.println("공지 메시지가 갱신되었습니다: " + newMessage);
+
+            // 해당 채팅방에 있는 모든 클라이언트에게 공지 메시지 전송
+            for (ClientHandler client : clients) {
+                if (client.name != null) {
+                    String[] participants = chatRoomName.split(", ");
+                    if (Arrays.asList(participants).contains(client.name)) {
+                        client.out.println("PINNED_MESSAGE:" + chatRoomName + ":" + newMessage);
+                    }
                 }
             }
         }

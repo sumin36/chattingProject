@@ -83,23 +83,22 @@ public class LoginFrame extends JFrame {
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // 사용자가 입력한 포트 번호와 이름
+                    // 서버 연결 및 유효성 확인
                     String id = textField.getText().trim();
-                    String port = new String(portField.getText()).trim();
+                    String port = portField.getText().trim();
 
-                    // 서버와 연결
                     socket = new Socket("localhost", Integer.parseInt(port));
                     out = new PrintWriter(socket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                    // 서버에 이름 전송 (입장 메시지)
-                    out.println(id);
+                    out.println(id);  // 사용자 ID 전송
 
-                    // 서버와 연결된 후 프레임 전환
-                    FriendListFrame.setUserName(id);  // static 메소드를 사용하여 이름 설정
+                    // FriendListFrame 생성 및 위치 설정
+                    FriendListFrame.setUserName(id);
                     FriendListFrame friendListFrame = new FriendListFrame(socket, out, in);
+                    friendListFrame.setLocation(getLocation());  // 로그인 창의 위치를 전달
                     friendListFrame.setVisible(true);
-                    dispose(); // 현재 로그인 창 닫기
+                    dispose();  // 현재 창 닫기
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(LoginFrame.this, "서버와 연결할 수 없습니다.", "연결 실패", JOptionPane.ERROR_MESSAGE);
                 }
@@ -153,4 +152,3 @@ public class LoginFrame extends JFrame {
     }
 
 }
-

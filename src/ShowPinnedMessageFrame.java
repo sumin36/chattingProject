@@ -18,7 +18,7 @@ public class ShowPinnedMessageFrame extends JFrame {
 
         JLabel lblMessage = new JLabel(chatRoomName);
         lblMessage.setFont(new Font("휴먼모음T", Font.BOLD, 14));
-        lblMessage.setBounds(10, 10, 120, 30);
+        lblMessage.setBounds(10, 10, 360, 30);
         getContentPane().add(lblMessage);
 
         JTextArea messageArea = new JTextArea();

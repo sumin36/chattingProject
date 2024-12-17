@@ -70,7 +70,6 @@ public class ChattingRoomFrame extends JFrame {
         contentPane.add(textField);
         textField.setColumns(10);
 
-        // 이모티콘 버튼 설정
         JButton btnEmoji = new JButton("+");
         btnEmoji.setBorder(new LineBorder(new Color(255, 204, 0), 3, true));
         btnEmoji.setBackground(new Color(255, 255, 255));

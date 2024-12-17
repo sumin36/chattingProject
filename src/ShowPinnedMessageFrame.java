@@ -8,7 +8,8 @@ import javax.swing.border.LineBorder;
 import java.awt.Color;
 
 public class ShowPinnedMessageFrame extends JFrame {
-	
+
+    //첫 공지 페이지
     public ShowPinnedMessageFrame(JLabel pinnedMessageLabel, String chatRoomName) {
     	getContentPane().setBackground(new Color(255, 255, 255));
         setTitle("공지 띄우기");
@@ -38,7 +39,7 @@ public class ShowPinnedMessageFrame extends JFrame {
             String message = messageArea.getText().trim();
             if (!message.isEmpty()) {
                 pinnedMessageLabel.setText(message);
-                // ChattingRoomFrame의 updatePinnedMessage 메소드 호출
+
                 ((ChattingRoomFrame) SwingUtilities.getWindowAncestor(pinnedMessageLabel)).updatePinnedMessage(message);
                 dispose();
             }

@@ -10,6 +10,7 @@ import javax.swing.border.LineBorder;
 
 public class PinnedMessageEditorFrame extends JFrame {
 
+    //공지 수정 페이지
     public PinnedMessageEditorFrame(String currentMessage, JLabel pinnedMessageLabel, String chatRoomName) {
     	getContentPane().setBackground(new Color(255, 255, 255));
         setTitle("공지 수정하기");

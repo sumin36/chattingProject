@@ -22,6 +22,7 @@ public class ReservationMessageFrame extends JFrame {
 	private JSpinner hourSpinner;
 	private JSpinner minuteSpinner;
 
+	//예약 페이지
 	public ReservationMessageFrame(Socket socket, PrintWriter out, String chatRoomName) {
 		this.out = out; // PrintWriter 초기화
 		this.chatRoomName = chatRoomName; // 채팅방 이름 초기화
@@ -142,20 +143,19 @@ public class ReservationMessageFrame extends JFrame {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(year, month, day, hour, minute, 0);
 
-		long delay = calendar.getTimeInMillis() - System.currentTimeMillis(); // 현재 시간과 예약 시간 차이 계산
+		long delay = calendar.getTimeInMillis() - System.currentTimeMillis();
 
 		if (delay < 0) {
 			JOptionPane.showMessageDialog(this,"현재 시간 이후로 예약해주세요.");
 			return;
 		}
 
-		// ScheduledExecutorService를 사용하여 예약 메시지 전송
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.schedule(() -> sendMessage(message), delay, TimeUnit.MILLISECONDS);
 
 		JOptionPane.showMessageDialog(this,"메시지가 " + year + "-" + (month + 1) + "-" + day + " " + hour + ":" + minute + "에 예약되었습니다.");
 
-		textArea.setText(""); // 텍스트 영역 비우기
+		textArea.setText("");
 	}
 
 	private void sendMessage(String message) {

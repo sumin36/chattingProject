@@ -37,6 +37,7 @@ public class LoginFrame extends JFrame {
     private Socket socket;
     private PrintWriter out;
 
+    // 애플리케이션을 실행하는 메인 함수
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -50,6 +51,7 @@ public class LoginFrame extends JFrame {
         });
     }
 
+    // 로그인 프레임의 초기화 및 구성
     public LoginFrame() {
         setTitle("로그인");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,7 +85,6 @@ public class LoginFrame extends JFrame {
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // 서버 연결 및 유효성 확인
                     String id = textField.getText().trim();
                     String port = portField.getText().trim();
 
@@ -91,14 +92,13 @@ public class LoginFrame extends JFrame {
                     out = new PrintWriter(socket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                    out.println(id);  // 사용자 ID 전송
+                    out.println(id);
 
-                    // FriendListFrame 생성 및 위치 설정
                     FriendListFrame.setUserName(id);
                     FriendListFrame friendListFrame = new FriendListFrame(socket, out, in);
-                    friendListFrame.setLocation(getLocation());  // 로그인 창의 위치를 전달
+                    friendListFrame.setLocation(getLocation());
                     friendListFrame.setVisible(true);
-                    dispose();  // 현재 창 닫기
+                    dispose();
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(LoginFrame.this, "서버와 연결할 수 없습니다.", "연결 실패", JOptionPane.ERROR_MESSAGE);
                 }
@@ -137,7 +137,7 @@ public class LoginFrame extends JFrame {
 
         ImageIcon icon = new ImageIcon(getClass().getResource("/img/chat.png"));
         Image img = icon.getImage();
-        Image updateImg=img.getScaledInstance(90, 90, Image.SCALE_SMOOTH);
+        Image updateImg = img.getScaledInstance(90, 90, Image.SCALE_SMOOTH);
         ImageIcon updateIcon = new ImageIcon(updateImg);
         JLabel imgLabel = new JLabel(updateIcon);
         imgLabel.setBounds(123, 390, 125, 82);
